@@ -20,8 +20,6 @@ MainClass::MainClass(QObject *parent)
     tray = new QSystemTrayIcon;
     tray->show();
 
-    QStringList lst;
-    lst << "uint";
     QDBusConnection con = QDBusConnection::connectToBus(QDBusConnection::SessionBus,"dbus");
 
     connectS("CoreHalted",SLOT(CoreHalted(quint32)));
@@ -43,9 +41,7 @@ MainClass::MainClass(QObject *parent)
 
     connect(this->timer,SIGNAL(timeout()),this,SLOT(tooLongNic()));
     this->timer->setSingleShot(true);
-    this->timer->start(1000);
-
-    prog->show();
+    this->timer->start(100);
 }
 
 MainClass::~MainClass()
