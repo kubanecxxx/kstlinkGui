@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/tray">
-        <file alias="stop">icons/Button-Close-icon.png</file>
-        <file alias="pause">icons/Button-Pause-icon.png</file>
-        <file alias="play">icons/Button-Play-icon.png</file>
-    </qresource>
-</RCC>

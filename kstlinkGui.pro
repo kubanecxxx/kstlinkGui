@@ -12,17 +12,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = kstlinkGui
 TEMPLATE = app
 
+SOURCES += main.cpp
 
-SOURCES += main.cpp \
-    tray.cpp \
-    bar.cpp
+include (gui/gui.pro)
+include (tray/tray.pro)
+include (treePages/widgetTreePages.pro)
 
-HEADERS  += \
-    tray.h \
-    bar.h
-
-RESOURCES += \
-    resources.qrc
-
-FORMS += \
-    bar.ui

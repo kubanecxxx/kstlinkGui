@@ -5,6 +5,19 @@
 #include <QDBusConnection>
 #include "bar.h"
 
+typedef struct
+{
+    QString run;
+    quint32 StopAddress;
+    int chipID;
+    quint32 coreID;
+    QString mcuName;
+    QString coreMode;
+    int breakpointCount;
+} s_t;
+
+
+class QMenu;
 class MainClass :public QObject
 {
     Q_OBJECT
@@ -24,18 +37,10 @@ private:
     bar * prog;
     QTimer * timer;
 
-    struct s
-    {
-        QString run;
-        quint32 StopAddress;
-        int chipID;
-        quint32 coreID;
-        QString mcuName;
-        QString coreMode;
-        int breakpointCount;
-    } s;
-
     bool refreshState(void);
+
+    s_t s;
+
 
 private slots:
     void CoreHalted(quint32);
@@ -49,6 +54,8 @@ private slots:
 
     void activated(QSystemTrayIcon::ActivationReason);
     void tooLongNic(void);
+
+    void Core(void);
 };
 
 #endif // MAINWINDOW_H

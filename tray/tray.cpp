@@ -1,8 +1,13 @@
 #include "tray.h"
+
 #include <QDBusConnection>
 #include <QDebug>
 #include <QTimer>
 #include <QDBusMessage>
+#include <QMenu>
+#include <QAction>
+#include "mainwindow.h"
+
 
 #define connectS(method,slot) con.sessionBus().connect(service,path,interface,method,this,slot);
 
@@ -11,7 +16,6 @@ MainClass::MainClass(QObject *parent)
       prog(new bar),
       timer(new QTimer(this))
 {
-
      service = "org.kubanec.kstlink";
      path = "/qstlink";
     //QString interface = "org.kubanec.kstlink.stlink";
@@ -42,6 +46,39 @@ MainClass::MainClass(QObject *parent)
     connect(this->timer,SIGNAL(timeout()),this,SLOT(tooLongNic()));
     this->timer->setSingleShot(true);
     this->timer->start(100);
+
+    //mainwindow
+    MainWindow * win = new MainWindow(s,this) ;
+    win->show();
+
+
+
+    //context menu
+    QMenu * c_m = new QMenu;
+    QAction * a;
+
+    a = c_m->addAction(QIcon(":/tray/config"),tr("Setting"));
+    connect(a,SIGNAL(triggered()),win,SLOT(show()));
+
+    c_m->addSeparator();
+    a = c_m->addAction(QIcon(":/tray/pause"),tr("Stop core"));
+    a->setProperty("core","CoreStop");
+    connect(a,SIGNAL(triggered()),this,SLOT(Core()));
+    a = c_m->addAction(QIcon(":/tray/play"),tr("Start core"));
+    a->setProperty("core","CoreRun");
+    connect(a,SIGNAL(triggered()),this,SLOT(Core()));
+    a = c_m->addAction(QIcon(":/tray/restart"),tr("Reset core"));
+    a->setProperty("core","SysReset");
+    connect(a,SIGNAL(triggered()),this,SLOT(Core()));
+
+    c_m->addSeparator();
+    //exit
+    a = c_m->addAction(QIcon(":/tray/stop"),tr("Exit"));
+    connect(a,SIGNAL(triggered()),parent,SLOT(quit()));
+
+    tray->setContextMenu(c_m);
+
+
 }
 
 MainClass::~MainClass()
@@ -52,6 +89,7 @@ MainClass::~MainClass()
 void MainClass::tooLongNic()
 {
     tray->hide();
+    prog->hide();
 }
 
 void MainClass::activated(QSystemTrayIcon::ActivationReason reason)
@@ -63,7 +101,7 @@ void MainClass::activated(QSystemTrayIcon::ActivationReason reason)
 void MainClass::CoreHalted(quint32 address)
 {
     s.StopAddress = address;
-    s.run = "Halted";
+    s.run = tr("Halted");
     tray->setIcon(QIcon(":/tray/pause"));
 }
 
@@ -76,7 +114,7 @@ void MainClass::CommunicationFailed()
 
 void MainClass::CoreRunning()
 {
-    s.run = "Running";
+    s.run = tr("Running");
     s.StopAddress = 0;
     tray->setIcon(QIcon(":/tray/play"));
 }
@@ -84,10 +122,10 @@ void MainClass::CoreRunning()
 void MainClass::Verification(bool ok)
 {
     if (ok)
-        tray->showMessage("Kstlink", "Verification successful",
+        tray->showMessage("Kstlink", tr("Verification successful"),
                           QSystemTrayIcon::Information,3000);
     else
-        tray->showMessage("Kstlink","Verification Failure",
+        tray->showMessage("Kstlink",tr("Verification Failure"),
                           QSystemTrayIcon::Critical,30000);
 
     prog->hide();
@@ -95,17 +133,17 @@ void MainClass::Verification(bool ok)
 
 void MainClass::Erasing(int percent)
 {
-    prog->ShowPercents(percent,"Erasing");
+    prog->ShowPercents(percent,tr("Erasing"));
 }
 
 void MainClass::Reading(int percent)
 {
-    prog->ShowPercents(percent,"Reading");
+    prog->ShowPercents(percent,tr("Reading"));
 }
 
 void MainClass::Flashing(int percent)
 {
-    prog->ShowPercents(percent,"Flashing");
+    prog->ShowPercents(percent,tr("Flashing"));
 }
 
 QDBusMessage MainClass::DbusCallMethod(const QString &method)
@@ -177,4 +215,12 @@ bool MainClass::refreshState()
     }
 
     return true;
+}
+
+void MainClass::Core()
+{
+    QVariant v = sender()->property("core");
+    Q_ASSERT(v.isValid());
+
+    DbusCallMethod(v.toString());
 }
