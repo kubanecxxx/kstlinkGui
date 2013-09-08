@@ -49,7 +49,7 @@ MainClass::MainClass(QObject *parent)
 
     //mainwindow
     MainWindow * win = new MainWindow(s,this) ;
-    win->show();
+    //win->show();
 
 
 
