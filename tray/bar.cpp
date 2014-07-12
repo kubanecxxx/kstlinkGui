@@ -21,6 +21,13 @@ bar::~bar()
     delete ui;
 }
 
+void bar::ShowTicks(quint32 ticks)
+{
+    now = ticks;
+
+    ui->pushButton->setText(QString("%1 ticks").arg(now - last));
+}
+
 void bar::ShowPercents(int percent, const QString &task)
 {
     show();
@@ -48,3 +55,9 @@ void bar::mouseMoveEvent(QMouseEvent *evt)
     setGeometry(rect);
 }
 #endif
+
+void bar::on_pushButton_clicked()
+{
+    last = now;
+    ShowTicks(last);
+}

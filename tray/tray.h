@@ -23,7 +23,7 @@ class MainClass :public QObject
     Q_OBJECT
 
 public:
-    MainClass(QObject *parent = 0);
+    MainClass(QDBusConnection & connection, QObject *parent = 0);
     ~MainClass();
 
 private:
@@ -40,7 +40,7 @@ private:
     bool refreshState(void);
 
     s_t s;
-
+    QDBusConnection con;
 
 private slots:
     void CoreHalted(quint32);
@@ -51,6 +51,7 @@ private slots:
     void Flashing(int);
     void Reading(int);
     void timeout();
+    void ResetRequested();
 
     void activated(QSystemTrayIcon::ActivationReason);
     void tooLongNic(void);

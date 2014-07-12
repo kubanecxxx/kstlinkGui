@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>179</width>
-    <height>61</height>
+    <width>178</width>
+    <height>83</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,6 +25,13 @@
     <widget class="QProgressBar" name="graph">
      <property name="value">
       <number>24</number>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>PushButton</string>
      </property>
     </widget>
    </item>

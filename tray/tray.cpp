@@ -9,30 +9,35 @@
 #include "mainwindow.h"
 
 
-#define connectS(method,slot) con.sessionBus().connect(service,path,interface,method,this,slot);
+#define connectS(method,slot) connection.sessionBus().connect(service,path,interface,method,this,slot);
 
-MainClass::MainClass(QObject *parent)
+MainClass::MainClass(QDBusConnection & connection, QObject *parent)
     : QObject(parent),
       prog(new bar),
-      timer(new QTimer(this))
+      timer(new QTimer(this)),
+      con(connection)
 {
      service = "org.kubanec.kstlink";
      path = "/qstlink";
-    //QString interface = "org.kubanec.kstlink.stlink";
-     interface = "org.qtproject.Qt.QStLink";
+     interface = "org.kubanec.kstlink.stlink";
+     //interface = "org.qtproject.Qt.QStLink";
 
     tray = new QSystemTrayIcon;
     tray->show();
 
-    QDBusConnection con = QDBusConnection::connectToBus(QDBusConnection::SessionBus,"dbus");
+    //QDBusConnection con = QDBusConnection::connectToBus(QDBusConnection::SessionBus,"dbus");
 
-    connectS("CoreHalted",SLOT(CoreHalted(quint32)));
+    bool ok;
+    ok = connectS("CoreHalted",SLOT(CoreHalted(quint32)));
     connectS("CommunicationFailed",SLOT(CommunicationFailed()));
     connectS("CoreRunning",SLOT(CoreRunning()));
     connectS("Verification",SLOT(Verification(bool)));
     connectS("Reading",SLOT(Reading(int)));
     connectS("Flashing",SLOT(Flashing(int)));
     connectS("Erasing",SLOT(Erasing(int)));
+    connectS("CoreResetRequested",SLOT(ResetRequested()));
+
+    qDebug() << ok;
 
     QTimer * timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(timeout()));
@@ -149,8 +154,8 @@ void MainClass::Flashing(int percent)
 QDBusMessage MainClass::DbusCallMethod(const QString &method)
 {
     QDBusMessage msg = QDBusMessage::createMethodCall(service,path,interface,method);
-    QDBusConnection con = QDBusConnection::connectToBus(QDBusConnection::SessionBus,"dbus");
-    msg = con.call(msg,QDBus::Block,300);
+    //QDBusConnection con = QDBusConnection::connectToBus(QDBusConnection::SessionBus,"dbus");
+    msg = this->con.call(msg,QDBus::Block,300);
 
     return msg;
 }
@@ -180,6 +185,15 @@ void MainClass::timeout()
         tray->setToolTip(tooltip);
         tray->show();
         timer->stop();
+
+        QDBusMessage msg = DbusCallMethod("GetCycleCounter");
+        QList<QVariant> d = msg.arguments();
+        if (d.count())
+        {
+            quint32 ticks = d.at(0).toUInt();
+            prog->ShowTicks(ticks);
+        }
+
    }
    else
    {
@@ -223,4 +237,9 @@ void MainClass::Core()
     Q_ASSERT(v.isValid());
 
     DbusCallMethod(v.toString());
+}
+
+void MainClass::ResetRequested()
+{
+    prog->on_pushButton_clicked();
 }

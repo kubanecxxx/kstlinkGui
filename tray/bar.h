@@ -20,9 +20,13 @@ private:
     //void mouseMoveEvent(QMouseEvent * evt);
     //void mousePressEvent(QMouseEvent * evt);
     QPoint pos;
+    quint32 last;
+    quint32 now;
 
 public slots:
     void ShowPercents(int percent, const QString & task);
+    void ShowTicks(quint32 ticks);
+    void on_pushButton_clicked();
 };
 
 #endif // BAR_H
